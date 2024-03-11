@@ -153,7 +153,6 @@ async Task AdicionaRegistrosTabela(IServiceProvider serviceProvider)
     }
 }
 
-public partial class Program { }
 
 
 
