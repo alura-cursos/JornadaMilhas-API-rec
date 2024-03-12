@@ -68,7 +68,7 @@ public class OfertaViagem_GET : IClassFixture<JornadaMilhasWebApplicationFactory
     }
 
     [Fact]
-    public async Task Recuperar_OfertasViagens_Na_Consulta__Ultima_Pagina()
+    public async Task Recuperar_OfertasViagens_Na_Consulta_Ultima_Pagina()
     {
         //Arrange
         app.Context.Database.ExecuteSqlRaw("Delete from OfertasViagem");
@@ -89,8 +89,30 @@ public class OfertaViagem_GET : IClassFixture<JornadaMilhasWebApplicationFactory
         //Assert
         Assert.True(response != null);
         Assert.Equal(5, response.Count());
-
     }
 
+    [Fact]
+    public async Task Recuperar_OfertasViagens_Na_Consulta_Com_Pagina_Inexistente()
+    {
+        //Arrange
+        app.Context.Database.ExecuteSqlRaw("Delete from OfertasViagem");
+
+        var ofertaDataBuilder = new OfertaViagemDataBuilder();
+        var listaDeOfertas = ofertaDataBuilder.Generate(80);
+        app.Context.OfertasViagem.AddRange(listaDeOfertas);
+        app.Context.SaveChanges();
+
+        using var client = await app.GetClientWithAccessTokenAsync();
+
+        int pagina = 5;
+        int tamanhoPorPagina = 25;
+
+        //Act
+        var response = await client.GetFromJsonAsync<ICollection<OfertaViagem>>($"/ofertas-viagem?pagina={pagina}&tamanhoPorPagina={tamanhoPorPagina}");
+
+        //Assert
+        Assert.True(response != null);
+        Assert.Equal(0, response.Count());
+    }
 
 }
