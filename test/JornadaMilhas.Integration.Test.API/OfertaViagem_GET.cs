@@ -115,6 +115,30 @@ public class OfertaViagem_GET : IClassFixture<JornadaMilhasWebApplicationFactory
         Assert.Equal(0, response.Count());
     }
 
+    [Fact]
+    public async Task Recuperar_OfertasViagens_Na_Consulta_Com_Pagina_Com_Valor_Negativo()
+    {
+        //Arrange
+        app.Context.Database.ExecuteSqlRaw("Delete from OfertasViagem");
+
+        var ofertaDataBuilder = new OfertaViagemDataBuilder();
+        var listaDeOfertas = ofertaDataBuilder.Generate(80);
+        app.Context.OfertasViagem.AddRange(listaDeOfertas);
+        app.Context.SaveChanges();
+
+        using var client = await app.GetClientWithAccessTokenAsync();
+
+        int pagina = -5;
+        int tamanhoPorPagina = 25;
+
+        //Act + Assert
+        await Assert.ThrowsAsync<HttpRequestException>(async () =>
+        {
+
+            var response = await client.GetFromJsonAsync<ICollection<OfertaViagem>>($"/ofertas-viagem?pagina={pagina}&tamanhoPorPagina={tamanhoPorPagina}");
+        });
+
+    }
 
 
 }
